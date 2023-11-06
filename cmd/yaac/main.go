@@ -4,10 +4,23 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
+
+const APP_NAME = "YAAC-Go-Prototype"
+
+var App fyne.App
+var mainWindow fyne.Window
+
+func main() {
+	// setuping window
+	mainWindow = App.NewWindow(APP_NAME)
+
+	// set icon
+	r, _ := LoadResourceFromPath("./Icon.png")
+	mainWindow.SetIcon(r)
+}
 
 func updateTime(clock *widget.Label) {
 	formatted := time.Now().Format("Current system time: 15:04:05")
@@ -38,27 +51,4 @@ func makeUI_w3() (*widget.Label, *widget.Entry) {
 	}
 
 	return out_label, in_entry
-}
-
-func main() {
-	a := app.New()
-	w := a.NewWindow("System time")
-
-	clock := makeUI_w1()
-	w.SetContent(clock)
-	// Update time in anonymous go-routine
-	go func() {
-		for range time.Tick(time.Second) {
-			updateTime(clock)
-		}
-	}()
-	w.SetMaster()
-	w.Show()
-
-	w2 := a.NewWindow("Larger")
-	w2.SetContent(makeUI_w2(a))
-	w2.Resize(fyne.NewSize(250, 100))
-	w2.Show()
-
-	a.Run()
 }
