@@ -4,8 +4,11 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
+	yaac_io "github.com/DHBW-SE-2023/yaac-go-prototype/pkg"
 )
 
 const APP_NAME = "YAAC-Go-Prototype"
@@ -14,12 +17,40 @@ var App fyne.App
 var mainWindow fyne.Window
 
 func main() {
+	App = app.NewWithID(APP_NAME)
+
 	// setuping window
 	mainWindow = App.NewWindow(APP_NAME)
 
 	// set icon
-	r, _ := LoadResourceFromPath("./Icon.png")
+	r, _ := yaac_io.LoadResourceFromPath("./Icon.png")
 	mainWindow.SetIcon(r)
+
+	// setup systray
+	if desk, ok := App.(desktop.App); ok {
+		m := fyne.NewMenu(APP_NAME,
+			fyne.NewMenuItem("Show", func() {
+				mainWindow.Show()
+			}))
+		desk.SetSystemTrayMenu(m)
+		desk.SetSystemTrayIcon(r)
+	}
+	mainWindow.SetCloseIntercept(func() {
+		mainWindow.Hide()
+	})
+
+	// handle main window
+	mainWindow.SetContent(makeUI_w1())
+	mainWindow.Show()
+	mainWindow.SetMaster()
+
+	// handle window 2
+	w2 := App.NewWindow("Larger")
+	w2.SetContent(makeUI_w2())
+	w2.Resize(fyne.NewSize(250, 100))
+	w2.Show()
+
+	App.Run()
 }
 
 func updateTime(clock *widget.Label) {
@@ -33,9 +64,9 @@ func makeUI_w1() *widget.Label {
 	return clock
 }
 
-func makeUI_w2(a fyne.App) *widget.Button {
+func makeUI_w2() *widget.Button {
 	return widget.NewButton("Open new", func() {
-		w3 := a.NewWindow("Third")
+		w3 := App.NewWindow("Third")
 		w3.SetContent(container.NewVBox(makeUI_w3()))
 		w3.Resize(fyne.NewSize(200, 50))
 		w3.Show()
