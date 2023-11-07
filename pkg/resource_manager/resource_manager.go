@@ -1,4 +1,4 @@
-package yaac_io
+package resource_manager
 
 import (
 	"bufio"
