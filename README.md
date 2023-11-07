@@ -6,9 +6,9 @@ Full-Stack YAAC Prototype writen in Go.
 Follow the guide on https://developer.fyne.io/started/ for your system
 ## Running
 ```shell
-go run .
+make run
 ```
 ## Packaging
 ```shell
-fyne package
+make package
 ```
