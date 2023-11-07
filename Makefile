@@ -1,20 +1,23 @@
 BINARY_PATH=build/yaac
-SOURCE_PATH=cmd/yaac/
+SOURCE_PATH=cmd/yaac
+
+.PHONY: all build test run clean
+
+yaac: $(SOURCE_PATH)/*.go
+	go build -o ./$(BINARY_PATH) ./$(SOURCE_PATH)
 
 all: build test
 
-build: $(SOURCE_PATH)/*.go
+build:
 	go build -o ./$(BINARY_PATH) ./$(SOURCE_PATH)
 
-test: $(SOURCE_PATH)/*.go
+test:
 	go test -v ./test/
 
 run:
-	make build
+	make
 	./$(BINARY_PATH)
 
 clean:
 	go clean
 	rm ./$(BINARY_PATH)
-
-.PHONY: all, build, test, run, clean
