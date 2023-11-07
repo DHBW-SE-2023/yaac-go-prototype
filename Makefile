@@ -3,16 +3,14 @@ SOURCE_PATH=cmd/yaac/
 
 all: build test
 
-yaac: $(SOURCE_PATH)/*.go
-	go build -o ./$(BINARY_PATH)
-
-build:
+build: $(SOURCE_PATH)/*.go
 	go build -o ./$(BINARY_PATH) ./$(SOURCE_PATH)
 
-test:
+test: $(SOURCE_PATH)/*.go
 	go test -v ./test/
 
 run:
+	make build
 	./$(BINARY_PATH)
 
 clean:
