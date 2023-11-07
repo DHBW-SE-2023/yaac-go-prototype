@@ -14,9 +14,11 @@ build:
 test:
 	go test -v ./test/
 
-run:
-	make
+run: build
 	./$(BINARY_PATH)
+
+package:
+	fyne package --src ./$(SOURCE_PATH)/ --icon ./../../Icon.png
 
 clean:
 	go clean
