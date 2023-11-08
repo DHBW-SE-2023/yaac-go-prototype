@@ -19,3 +19,7 @@
 
 # Go workspace file
 go.work
+
+# Build folder
+!build/README.md
+build/*

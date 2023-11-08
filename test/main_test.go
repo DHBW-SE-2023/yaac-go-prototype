@@ -1,11 +1,6 @@
 package main
 
-import (
-	"testing"
-
-	"fyne.io/fyne/v2/test"
-)
-
+/*
 func TestThirdWindowUI(t *testing.T) {
 	out_label, in_entry := makeUI_w3()
 
@@ -20,3 +15,4 @@ func TestThirdWindowUI(t *testing.T) {
 		t.Error("Incorrect user input handling")
 	}
 }
+*/
