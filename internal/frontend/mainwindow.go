@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
-	yaac_consts "github.com/DHBW-SE-2023/yaac-go-prototype/internal/consts"
+	yaac_shared "github.com/DHBW-SE-2023/yaac-go-prototype/internal/shared"
 	resource "github.com/DHBW-SE-2023/yaac-go-prototype/pkg/resource_manager"
 )
 
@@ -14,10 +14,10 @@ var App fyne.App
 var mainWindow fyne.Window
 
 func (f *Frontend) OpenMainWindow() {
-	App = app.NewWithID(yaac_consts.APP_NAME)
+	App = app.NewWithID(yaac_shared.APP_NAME)
 
 	// setuping window
-	mainWindow = App.NewWindow(yaac_consts.APP_NAME)
+	mainWindow = App.NewWindow(yaac_shared.APP_NAME)
 
 	// set icon
 	r, _ := resource.LoadResourceFromPath("./Icon.png")
@@ -25,7 +25,7 @@ func (f *Frontend) OpenMainWindow() {
 
 	// setup systray
 	if desk, ok := App.(desktop.App); ok {
-		m := fyne.NewMenu(yaac_consts.APP_NAME,
+		m := fyne.NewMenu(yaac_shared.APP_NAME,
 			fyne.NewMenuItem("Show", func() {
 				mainWindow.Show()
 			}))

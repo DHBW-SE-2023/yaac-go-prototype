@@ -5,20 +5,15 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
-	yaac_consts "github.com/DHBW-SE-2023/yaac-go-prototype/internal/consts"
+	yaac_shared "github.com/DHBW-SE-2023/yaac-go-prototype/internal/shared"
 	resource "github.com/DHBW-SE-2023/yaac-go-prototype/pkg/resource_manager"
 )
 
 var mailWindow fyne.Window
 var result_label *widget.Label
 
-type EmailData struct {
-	Email    string
-	Password string
-}
-
 func (f *Frontend) OpenMailWindow() {
-	mailWindow = App.NewWindow(yaac_consts.APP_NAME)
+	mailWindow = App.NewWindow(yaac_shared.APP_NAME)
 
 	// set icon
 	r, _ := resource.LoadResourceFromPath("./Icon.png")
@@ -35,7 +30,7 @@ func (f *Frontend) UpdateResultLabel(content string) {
 func makeMailWindow(f *Frontend) *fyne.Container {
 	top_label := widget.NewLabel("Please enter your credentials:")
 
-	formStruct := EmailData{}
+	formStruct := yaac_shared.EmailData{}
 
 	formData := binding.BindStruct(&formStruct)
 	form := newFormWithData(formData)
