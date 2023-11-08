@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
-	yaac_consts "github.com/DHBW-SE-2023/yaac-go-prototype/cmd/yaac/consts"
+	yaac_consts "github.com/DHBW-SE-2023/yaac-go-prototype/internal/consts"
 	resource "github.com/DHBW-SE-2023/yaac-go-prototype/pkg/resource_manager"
 )
 

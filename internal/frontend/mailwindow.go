@@ -5,8 +5,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
-	yaac_consts "github.com/DHBW-SE-2023/yaac-go-prototype/cmd/yaac/consts"
-	yaac_mvvm "github.com/DHBW-SE-2023/yaac-go-prototype/cmd/yaac/mvvm"
+	yaac_consts "github.com/DHBW-SE-2023/yaac-go-prototype/internal/consts"
 	resource "github.com/DHBW-SE-2023/yaac-go-prototype/pkg/resource_manager"
 )
 
@@ -31,13 +30,13 @@ func OpenMailWindow() {
 func makeMailWindow() *fyne.Container {
 	top_label := widget.NewLabel("Please enter your credentials:")
 
-	formStruct := yaac_mvvm.EmailData{}
+	formStruct := EmailData{}
 
 	formData := binding.BindStruct(&formStruct)
 	form := newFormWithData(formData)
 
 	form.OnSubmit = func() {
-		yaac_mvvm.MailFormUpdated(formStruct)
+
 	}
 
 	result_label = widget.NewLabel("")
