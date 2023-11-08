@@ -1,7 +1,8 @@
 package main
 
-import yaac_frontend "github.com/DHBW-SE-2023/yaac-go-prototype/internal/frontend"
+import yaac_mvvm "github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm"
 
 func main() {
-	yaac_frontend.OpenMainWindow()
+	mvvm := yaac_mvvm.New()
+	mvvm.OpenMainWindow()
 }

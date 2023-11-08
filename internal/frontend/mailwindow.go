@@ -13,21 +13,26 @@ var mailWindow fyne.Window
 var result_label *widget.Label
 
 type EmailData struct {
-	Name, Email string
+	Email    string
+	Password string
 }
 
-func OpenMailWindow() {
+func (f *Frontend) OpenMailWindow() {
 	mailWindow = App.NewWindow(yaac_consts.APP_NAME)
 
 	// set icon
 	r, _ := resource.LoadResourceFromPath("./Icon.png")
 	mailWindow.SetIcon(r)
 
-	mailWindow.SetContent(makeMailWindow())
+	mailWindow.SetContent(makeMailWindow(f))
 	mailWindow.Show()
 }
 
-func makeMailWindow() *fyne.Container {
+func (f *Frontend) UpdateResultLabel(content string) {
+	result_label.SetText(content)
+}
+
+func makeMailWindow(f *Frontend) *fyne.Container {
 	top_label := widget.NewLabel("Please enter your credentials:")
 
 	formStruct := EmailData{}
@@ -36,7 +41,7 @@ func makeMailWindow() *fyne.Container {
 	form := newFormWithData(formData)
 
 	form.OnSubmit = func() {
-
+		f.MVVM.MailFormUpdated(formStruct)
 	}
 
 	result_label = widget.NewLabel("")
@@ -46,10 +51,6 @@ func makeMailWindow() *fyne.Container {
 		form,
 		result_label,
 	)
-}
-
-func UpdateResultLabel(content string) {
-	result_label.Text = content
 }
 
 func newFormWithData(data binding.DataMap) *widget.Form {

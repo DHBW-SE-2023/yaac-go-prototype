@@ -13,7 +13,7 @@ import (
 var App fyne.App
 var mainWindow fyne.Window
 
-func OpenMainWindow() {
+func (f *Frontend) OpenMainWindow() {
 	App = app.NewWithID(yaac_consts.APP_NAME)
 
 	// setuping window
@@ -37,15 +37,15 @@ func OpenMainWindow() {
 	})
 
 	// handle main window
-	mainWindow.SetContent(makeMainWindow())
+	mainWindow.SetContent(makeMainWindow(f))
 	mainWindow.Show()
 
 	App.Run()
 }
 
-func makeMainWindow() *fyne.Container {
+func makeMainWindow(f *Frontend) *fyne.Container {
 	header := widget.NewLabel("Select an action:")
-	mail_button := widget.NewButton("Open Mail Window", OpenMailWindow)
+	mail_button := widget.NewButton("Open Mail Window", f.OpenMailWindow)
 
 	return container.NewVBox(
 		header,
