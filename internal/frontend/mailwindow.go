@@ -13,7 +13,7 @@ var mailWindow fyne.Window
 var result_label *widget.Label
 
 func (f *Frontend) OpenMailWindow() {
-	mailWindow = App.NewWindow(yaac_shared.APP_NAME)
+	mailWindow = App.NewWindow("Mail Demo")
 
 	// set icon
 	r, _ := resource.LoadResourceFromPath("./Icon.png")
