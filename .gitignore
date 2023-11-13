@@ -23,3 +23,6 @@ go.work
 # Build folder
 !build/README.md
 build/*
+
+# Ignore Personal Data
+assets/list_*.jpg
