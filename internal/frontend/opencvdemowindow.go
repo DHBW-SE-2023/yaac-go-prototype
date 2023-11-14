@@ -1,6 +1,7 @@
 package yaac_frontend
 
 import (
+	"fmt"
 	"io"
 	"log"
 
@@ -15,8 +16,9 @@ import (
 )
 
 type OpencvDemoWindow struct {
-	Window fyne.Window
-	Image  *canvas.Image
+	Window              fyne.Window
+	Image               *canvas.Image
+	InputImageContainer *fyne.Container
 }
 
 var opencvDemoWindow OpencvDemoWindow
@@ -41,7 +43,7 @@ func (f *Frontend) OpenOpencvDemoWindow() {
 
 func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 	header := widget.NewLabel("Please select an Input image:")
-	//openFile := widget.NewButton("File Open", openOpencvDemoWindowFileDialog)
+
 	openFile := widget.NewButton("File Open With Filter (.jpg or .png)", func() {
 		fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -53,38 +55,47 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 				return
 			}
 
-			showImage(reader)
+			showImage(reader, opencvDemoWindow.InputImageContainer)
 		}, opencvDemoWindow.Window)
 		fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".jpeg"}))
 		fd.Show()
 	})
 	opencvDemoWindow.Image = canvas.NewImageFromResource(theme.FyneLogo())
-	input_image := container.NewScroll(opencvDemoWindow.Image)
-	//input_image.Content
-	//input_image.Resize(input_image.Size())
-	//input_image.Resize(fyne.NewSize(800, 800))
-	input_image_container := container.NewCenter(input_image)
-	input_image_container.Resize(input_image.Size())
+	inputImage := container.NewScroll(opencvDemoWindow.Image)
+	opencvDemoWindow.InputImageContainer = container.NewCenter(inputImage)
+	opencvDemoWindow.InputImageContainer.Resize(inputImage.Size())
+
+	showFile := widget.NewButton("Test 12345 Lebkuchen", func() {
+		log.Println("tapped")
+	})
 
 	return container.NewVBox(
 		header,
 		openFile,
-		input_image_container,
+		showFile,
+		opencvDemoWindow.InputImageContainer,
 	)
 }
 
 func loadImage(f fyne.URIReadCloser) *canvas.Image {
 	data, err := io.ReadAll(f)
 	if err != nil {
-		fyne.LogError("Failed to load image data", err)
+		fyne.LogError("Error at loading file", err)
 		return nil
 	}
 	res := fyne.NewStaticResource(f.URI().Name(), data)
 
-	return canvas.NewImageFromResource(res)
+	img := canvas.NewImageFromResource(res)
+	if img == nil {
+		fyne.LogError("Error at creating file object", err)
+		return nil
+	}
+
+	fmt.Println("Image created successfully")
+	return img
 }
 
-func showImage(f fyne.URIReadCloser) {
+func showImage(f fyne.URIReadCloser, imgContainer *fyne.Container) {
 	if f == nil {
 		log.Println("Cancelled")
 		return
@@ -92,13 +103,19 @@ func showImage(f fyne.URIReadCloser) {
 	defer f.Close()
 	img := loadImage(f)
 	if img == nil {
+		log.Println("Error at loading image")
 		return
 	}
-	img.FillMode = canvas.ImageFillOriginal
 
-	//w := fyne.CurrentApp().NewWindow(f.URI().Name())
-	//w.SetContent(container.NewScroll(img))
-	//w.Resize(fyne.NewSize(320, 240))
-	//w.Show()
+	img.FillMode = canvas.ImageFillContain
+	//resize container to size of image
+	imgContainer.Resize(img.Size())
 
+	// insert new image
+	imgContainer.Objects = []fyne.CanvasObject{container.NewScroll(img)}
+
+	// actualize and show window
+	opencvDemoWindow.Window.Content().Refresh()
+	opencvDemoWindow.Window.RequestFocus()
+	opencvDemoWindow.Window.Show()
 }
