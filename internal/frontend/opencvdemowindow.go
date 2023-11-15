@@ -1,7 +1,6 @@
 package yaac_frontend
 
 import (
-	"fmt"
 	"io"
 	"log"
 
@@ -91,7 +90,14 @@ func loadImage(f fyne.URIReadCloser) *canvas.Image {
 		return nil
 	}
 
-	fmt.Println("Image created successfully")
+	// Calculate the desired size for the loaded image based on a fixed width
+	fixedWidth := 400
+	aspectRatio := float32(img.MinSize().Height) / float32(img.MinSize().Width)
+	fixedHeight := int(float32(fixedWidth) * aspectRatio)
+
+	// Set the calculated size directly on the image
+	img.Resize(fyne.NewSize(float32(fixedWidth), float32(fixedHeight)))
+
 	return img
 }
 
@@ -108,13 +114,14 @@ func showImage(f fyne.URIReadCloser, imgContainer *fyne.Container) {
 	}
 
 	img.FillMode = canvas.ImageFillContain
-	//resize container to size of image
-	imgContainer.Resize(img.Size())
 
-	// insert new image
-	imgContainer.Objects = []fyne.CanvasObject{container.NewScroll(img)}
+	// Create a container with dynamic sizing
+	containerWithDynamicSizing := fyne.NewContainer(img)
 
-	// actualize and show window
+	// Set the content of the main container to the new container with dynamic sizing
+	imgContainer.Objects = []fyne.CanvasObject{containerWithDynamicSizing}
+
+	// Actualize and show window
 	opencvDemoWindow.Window.Content().Refresh()
 	opencvDemoWindow.Window.RequestFocus()
 	opencvDemoWindow.Window.Show()
