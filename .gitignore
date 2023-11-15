@@ -25,4 +25,5 @@ go.work
 build/*
 
 # Ignore Personal Data
-assets/list_*.jpg
+assets/list*.jpg
+assets/state*.jpg
