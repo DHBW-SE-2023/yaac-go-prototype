@@ -12,7 +12,7 @@ import (
 
 // Performs a warp-perspective transform on the image under image_path
 //
-//	 Input: image_path -> Path to the image in the FS
+//	 Input: image_path string -> Path to the image in the FS
 //	 Output: (string, bool)
 //
 //		string -> Depends on bool
