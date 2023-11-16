@@ -60,7 +60,7 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 		fd.Show()
 	})
 	opencvDemoWindow.Image = canvas.NewImageFromResource(theme.FyneLogo())
-	inputImage := container.NewScroll(opencvDemoWindow.Image)
+	inputImage := container.NewScroll(opencvDemoWindow.Image) //previously: container.NewScroll(opencvDemoWindow.Image) - somehow works both (NewCenter)
 	opencvDemoWindow.InputImageContainer = container.NewCenter(inputImage)
 	opencvDemoWindow.InputImageContainer.Resize(inputImage.Size())
 
@@ -113,7 +113,7 @@ func showImage(f fyne.URIReadCloser, imgContainer *fyne.Container) {
 		return
 	}
 
-	img.FillMode = canvas.ImageFillContain
+	img.FillMode = canvas.ImageFillContain //.ImageFillOriginal
 
 	// Create a container with dynamic sizing
 	containerWithDynamicSizing := fyne.NewContainer(img)
