@@ -7,5 +7,5 @@ import (
 )
 
 func (b *Backend) GetResponse(input yaac_shared.EmailData) string {
-	return fmt.Sprintf("Hello %s!", input.Email)
+	return fmt.Sprintf("Hello %s! Dein Passwort ist: %s", input.Email, input.Password)
 }
