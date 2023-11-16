@@ -19,7 +19,12 @@ import (
 //			true -> Path to the transormed image in the FS
 //			false -> Error Message
 //		bool -> If the trasnformation was successfull
-func (b *Backend) StartGoCV(image_path string) (string, bool) {
+func (b *Backend) StartGoCV(image_path string, prog chan int) (string, bool) {
+	if prog != nil {
+		defer close(prog)
+		prog <- 0
+	}
+
 	image := gocv.IMRead(image_path, gocv.IMReadColor)
 	msg := ""
 	suc := false
@@ -27,48 +32,62 @@ func (b *Backend) StartGoCV(image_path string) (string, bool) {
 		msg = "Empty image"
 		return msg, suc
 	} else {
-		fmt.Print("Loaded image!\n\tSize: ")
-		fmt.Println(image.Size())
-
-		err := transform_image(image, false)
+		//fmt.Print("Loaded image!\n\tSize: ")
+		//fmt.Println(image.Size())
+		debug := false
+		err := transform_image(image, debug, prog)
 		if err != nil {
-			fmt.Println(err)
+			//fmt.Println(err)
 			return err.Error(), suc
 		}
-		out_path, saved := save_image_state("list_output", image)
+		out_path, saved := save_image_state("list_output", image, debug)
+		if prog != nil {
+			prog <- 100
+		}
 		if saved {
 			return out_path, saved
 		} else {
 			msg = "ERROR: Failed to save image"
-			fmt.Println(msg)
+			//fmt.Println(msg)
 			return msg, suc
 		}
 	}
 }
 
-func save_image_state(state_name string, img gocv.Mat) (string, bool) {
-	fmt.Printf("%s:\n\tSize: ", state_name)
-	fmt.Print(img.Size())
-	fmt.Print(" Saved: ")
+func save_image_state(state_name string, img gocv.Mat, debug bool) (string, bool) {
+	if debug {
+		fmt.Printf("%s:\n\tSize: ", state_name)
+		fmt.Print(img.Size())
+		fmt.Print(" Saved: ")
+	}
+
 	path := fmt.Sprintf("./assets/%s.jpg", state_name)
 	suc := gocv.IMWrite(path, img)
-	fmt.Println(suc)
+	if debug {
+		fmt.Println(suc)
+	}
 
 	return path, suc
 }
 
-func transform_image(img gocv.Mat, debug bool) error {
+func transform_image(img gocv.Mat, debug bool, prog chan int) error {
 	// Save initial State
 	if debug {
-		save_image_state("state00_initial", img)
+		save_image_state("state00_initial", img, debug)
 	}
 	tmp := img.Clone()
+	if prog != nil {
+		prog <- 1
+	}
 
 	// Make grey
 	gocv.CvtColor(tmp, &tmp, gocv.ColorBGRToGray)
 	image_size := tmp.Size()
 	if debug {
-		save_image_state("state01_grey", tmp)
+		save_image_state("state01_grey", tmp, debug)
+	}
+	if prog != nil {
+		prog <- 10
 	}
 
 	// Blur and theshhold
@@ -77,7 +96,10 @@ func transform_image(img gocv.Mat, debug bool) error {
 	gocv.Threshold(tmp, &tmp, 128, 255, gocv.ThresholdOtsu) // Better according to @Leander
 	gocv.FastNlMeansDenoisingWithParams(tmp, &tmp, 11, 31, 9)
 	if debug {
-		save_image_state("state02_blur_thresh", tmp)
+		save_image_state("state02_blur_thresh", tmp, debug)
+	}
+	if prog != nil {
+		prog <- 20
 	}
 
 	/*
@@ -106,7 +128,10 @@ func transform_image(img gocv.Mat, debug bool) error {
 		simplified_contours.Append(poly)
 	}
 	if debug {
-		save_image_state("state03_edges", edges)
+		save_image_state("state03_edges", edges, debug)
+	}
+	if prog != nil {
+		prog <- 30
 	}
 
 	// Find bigges contours
@@ -129,7 +154,10 @@ func transform_image(img gocv.Mat, debug bool) error {
 	}
 	gocv.DrawContours(&img, simplified_contours, -1, color.RGBA{255, 0, 0, 0}, 1)
 	if debug {
-		save_image_state("state04_contours", img)
+		save_image_state("state04_contours", img, debug)
+	}
+	if prog != nil {
+		prog <- 40
 	}
 
 	// Four point transform
@@ -191,6 +219,9 @@ func transform_image(img gocv.Mat, debug bool) error {
 			arg_max_dif_ind = i
 		}
 	}
+	if prog != nil {
+		prog <- 50
+	}
 	/*
 		fmt.Printf(
 			"pts:\n\tSize: %d\nargs:\n\tmin_sum: %d\n\tmax_sum: %d\n\tmin_dif: %d\n\tmax_dif: %d\n\t\n",
@@ -243,12 +274,19 @@ func transform_image(img gocv.Mat, debug bool) error {
 		{0, maxHeight - 1},
 	})
 
+	if prog != nil {
+		prog <- 60
+	}
+
 	// compute the perspective transform matrix and then apply it
 	M := gocv.GetPerspectiveTransform(rect, dst)
 	gocv.WarpPerspective(img, &img, M, image.Point{maxWidth, maxHeight})
 
 	if debug {
-		save_image_state("state05_perspective_transform", img)
+		save_image_state("state05_perspective_transform", img, debug)
+	}
+	if prog != nil {
+		prog <- 70
 	}
 
 	// Create our shapening kernel, it must equal to one eventually
@@ -262,11 +300,16 @@ func transform_image(img gocv.Mat, debug bool) error {
 	kernel_sharpening.SetIntAt(2, 0, 0)
 	kernel_sharpening.SetIntAt(2, 1, -1)
 	kernel_sharpening.SetIntAt(2, 2, 0)
+	if prog != nil {
+		prog <- 80
+	}
 	// applying the sharpening kernel to the input image & displaying it.
 	gocv.Filter2D(img, &img, -1, kernel_sharpening, image.Point{-1, -1}, 0, gocv.BorderDefault)
-
+	if prog != nil {
+		prog <- 90
+	}
 	if debug {
-		save_image_state("state06_final", img)
+		save_image_state("state06_final", img, debug)
 	}
 
 	return nil
