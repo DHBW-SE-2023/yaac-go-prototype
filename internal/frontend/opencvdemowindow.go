@@ -1,6 +1,7 @@
 package yaac_frontend
 
 import (
+	"image/color"
 	"io"
 	"log"
 
@@ -9,17 +10,14 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	resource "github.com/DHBW-SE-2023/yaac-go-prototype/pkg/resource_manager"
 )
 
 type OpencvDemoWindow struct {
-	Window              fyne.Window
-	Image               *canvas.Image
-	InputImageContainer *fyne.Container
-	ImagePath           string
-	ProgBar             *widget.ProgressBar
+	Window    fyne.Window
+	ImagePath string
+	ProgBar   *widget.ProgressBar
 }
 
 var opencvDemoWindow OpencvDemoWindow
@@ -49,6 +47,10 @@ func (f *Frontend) UpdateProgress(value float64) {
 func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 	header := widget.NewLabel("Please select an Input image:")
 
+	inputImage := canvas.NewLinearGradient(color.Transparent, color.Black, 0)
+	inputImageScroll := container.NewScroll(inputImage)
+	inputImageContainer := container.NewAdaptiveGrid(1, inputImageScroll)
+
 	openFile := widget.NewButton("File Open With Filter (.jpg or .png)", func() {
 		fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -60,15 +62,11 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 				return
 			}
 			opencvDemoWindow.ImagePath = reader.URI().Path()
-			showImage(reader, opencvDemoWindow.InputImageContainer)
+			showImage(reader, inputImageContainer)
 		}, opencvDemoWindow.Window)
 		fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".jpeg"}))
 		fd.Show()
 	})
-	opencvDemoWindow.Image = canvas.NewImageFromResource(theme.FyneLogo())
-	inputImage := container.NewScroll(opencvDemoWindow.Image) //previously: container.NewScroll(opencvDemoWindow.Image) - somehow works both (NewCenter)
-	opencvDemoWindow.InputImageContainer = container.NewCenter(inputImage)
-	opencvDemoWindow.InputImageContainer.Resize(inputImage.Size())
 
 	startOpenCV := widget.NewButton("Run OpenCV", func() {
 		f.MVVM.StartGoCV(opencvDemoWindow.ImagePath)
@@ -76,13 +74,28 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 
 	opencvDemoWindow.ProgBar = widget.NewProgressBar()
 
-	return container.NewVBox(
-		header,
-		openFile,
-		opencvDemoWindow.InputImageContainer,
-		startOpenCV,
-		opencvDemoWindow.ProgBar,
-	)
+	/*
+		box := container.NewVBox(
+			header,
+			openFile,
+			inputImageContainer,
+			startOpenCV,
+			opencvDemoWindow.ProgBar,
+		)
+	*/
+	return container.NewAdaptiveGrid(1, container.NewScroll(container.NewAdaptiveGrid(
+		1,
+		container.NewVBox(
+			header,
+			openFile,
+		),
+		inputImageContainer,
+		container.NewVBox(
+			startOpenCV,
+			opencvDemoWindow.ProgBar,
+		),
+		widget.NewLabel("TEST"),
+	)))
 }
 
 func loadImage(f fyne.URIReadCloser) *canvas.Image {
@@ -92,20 +105,11 @@ func loadImage(f fyne.URIReadCloser) *canvas.Image {
 		return nil
 	}
 	res := fyne.NewStaticResource(f.URI().Name(), data)
-
 	img := canvas.NewImageFromResource(res)
 	if img == nil {
 		fyne.LogError("Error at creating file object", err)
 		return nil
 	}
-
-	// Calculate the desired size for the loaded image based on a fixed width
-	fixedWidth := 400
-	aspectRatio := float32(img.MinSize().Height) / float32(img.MinSize().Width)
-	fixedHeight := int(float32(fixedWidth) * aspectRatio)
-
-	// Set the calculated size directly on the image
-	img.Resize(fyne.NewSize(float32(fixedWidth), float32(fixedHeight)))
 
 	return img
 }
@@ -122,13 +126,22 @@ func showImage(f fyne.URIReadCloser, imgContainer *fyne.Container) {
 		return
 	}
 
-	img.FillMode = canvas.ImageFillContain //.ImageFillOriginal
+	img.FillMode = canvas.ImageFillContain
 
 	// Create a container with dynamic sizing
-	containerWithDynamicSizing := fyne.NewContainer(img)
+	//containerWithDynamicSizing := fyne.NewContainer(img)
 
 	// Set the content of the main container to the new container with dynamic sizing
-	imgContainer.Objects = []fyne.CanvasObject{containerWithDynamicSizing}
+	//imgContainer.Objects = []fyne.CanvasObject{containerWithDynamicSizing}
+
+	//inputImage := canvas.NewImageFromFile(img.File)
+	//inputImageScroll := container.NewScroll(inputImage)
+	imgScroll := container.NewScroll(img)
+	//imgScroll.Resize(img.Size())
+	imgContainer.Objects = []fyne.CanvasObject{imgScroll}
+
+	//imgContainer.Resize(img.Size())
+	//fmt.Println(img.Size())
 
 	// Actualize and show window
 	opencvDemoWindow.Window.Content().Refresh()
