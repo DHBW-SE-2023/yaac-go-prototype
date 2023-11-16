@@ -27,3 +27,4 @@ build/*
 # Ignore Personal Data
 assets/list*.jpg
 assets/state*.jpg
+.vscode/
