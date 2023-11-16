@@ -1,9 +1,9 @@
 package yaac_frontend
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/widget"
 	yaac_shared "github.com/DHBW-SE-2023/yaac-go-prototype/internal/shared"
 	resource "github.com/DHBW-SE-2023/yaac-go-prototype/pkg/resource_manager"
@@ -19,62 +19,50 @@ func (f *Frontend) OpenMailWindow() {
 	r, _ := resource.LoadResourceFromPath("./Icon.png")
 	mailWindow.SetIcon(r)
 
-	mailWindow.SetContent(makeMailWindow(f))
+	mailWindow.SetContent(makeFormTab(mailWindow, f))
 	mailWindow.Show()
 }
 
 func (f *Frontend) UpdateResultLabel(content string) {
 	result_label.SetText(content)
+	fyne.CurrentApp().SendNotification(&fyne.Notification{
+		Title: content,
+	})
 }
 
-func makeMailWindow(f *Frontend) *fyne.Container {
-	top_label := widget.NewLabel("Please enter your credentials:")
+func makeFormTab(_ fyne.Window, f *Frontend) fyne.CanvasObject {
+	mailServer := widget.NewEntry()
+	mailServer.SetPlaceHolder("John Smith")
 
-	formStruct := yaac_shared.EmailData{}
+	email := widget.NewEntry()
+	email.SetPlaceHolder("test@example.com")
+	email.Validator = validation.NewRegexp(`\w{1,}@\w{1,}\.\w{1,4}`, "not a valid email")
 
-	formData := binding.BindStruct(&formStruct)
-	form := newFormWithData(formData)
-
-	form.OnSubmit = func() {
-		f.MVVM.MailFormUpdated(formStruct)
-	}
+	password := widget.NewPasswordEntry()
+	password.SetPlaceHolder("Password")
 
 	result_label = widget.NewLabel("")
 
-	return container.NewVBox(
-		top_label,
-		form,
-		result_label,
-	)
-}
+	form := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "MailServer", Widget: mailServer, HintText: "Specify the address of your mail server with ':port'"},
+			{Text: "Email", Widget: email, HintText: "Your email address"},
+		},
+		OnCancel: func() {
+			fmt.Println("Cancelled")
+		},
+		OnSubmit: func() {
 
-func newFormWithData(data binding.DataMap) *widget.Form {
-	keys := data.Keys()
-	items := make([]*widget.FormItem, len(keys))
-	for i, k := range keys {
-		data, err := data.GetItem(k)
-		if err != nil {
-			items[i] = widget.NewFormItem(k, widget.NewLabel(err.Error()))
-		}
-		items[i] = widget.NewFormItem(k, createBoundItem(data))
+			formStruct := yaac_shared.EmailData{
+				MailServer: mailServer.Text,
+				Email:      email.Text,
+				Password:   password.Text,
+			}
+			f.MVVM.MailFormUpdated(formStruct)
+		},
 	}
+	form.Append("Password", password)
+	form.Append("Your first unread message:", result_label)
 
-	return widget.NewForm(items...)
-}
-
-func createBoundItem(v binding.DataItem) fyne.CanvasObject {
-	switch val := v.(type) {
-	case binding.Bool:
-		return widget.NewCheckWithData("", val)
-	case binding.Float:
-		s := widget.NewSliderWithData(0, 1, val)
-		s.Step = 0.01
-		return s
-	case binding.Int:
-		return widget.NewEntryWithData(binding.IntToString(val))
-	case binding.String:
-		return widget.NewEntryWithData(val)
-	default:
-		return widget.NewLabel("")
-	}
+	return form
 }
