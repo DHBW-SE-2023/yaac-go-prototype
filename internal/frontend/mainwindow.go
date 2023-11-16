@@ -46,9 +46,11 @@ func (f *Frontend) OpenMainWindow() {
 func makeMainWindow(f *Frontend) *fyne.Container {
 	header := widget.NewLabel("Select an action:")
 	mail_button := widget.NewButton("Open Mail Window", f.OpenMailWindow)
+	opencv_button := widget.NewButton("Open OpenCV Demo Window", f.OpenOpencvDemoWindow)
 
 	return container.NewVBox(
 		header,
 		mail_button,
+		opencv_button,
 	)
 }
