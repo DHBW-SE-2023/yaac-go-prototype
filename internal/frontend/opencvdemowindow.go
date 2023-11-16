@@ -18,6 +18,8 @@ type OpencvDemoWindow struct {
 	Window              fyne.Window
 	Image               *canvas.Image
 	InputImageContainer *fyne.Container
+	ImagePath           string
+	ProgBar             *widget.ProgressBar
 }
 
 var opencvDemoWindow OpencvDemoWindow
@@ -40,6 +42,10 @@ func (f *Frontend) OpenOpencvDemoWindow() {
 	App.Run()
 }
 
+func (f *Frontend) UpdateProgress(value float64) {
+	opencvDemoWindow.ProgBar.SetValue(value)
+}
+
 func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 	header := widget.NewLabel("Please select an Input image:")
 
@@ -53,7 +59,7 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 				log.Println("Cancelled")
 				return
 			}
-
+			opencvDemoWindow.ImagePath = reader.URI().Path()
 			showImage(reader, opencvDemoWindow.InputImageContainer)
 		}, opencvDemoWindow.Window)
 		fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".jpeg"}))
@@ -64,15 +70,18 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 	opencvDemoWindow.InputImageContainer = container.NewCenter(inputImage)
 	opencvDemoWindow.InputImageContainer.Resize(inputImage.Size())
 
-	showFile := widget.NewButton("Test 12345 Lebkuchen", func() {
-		log.Println("tapped")
+	startOpenCV := widget.NewButton("Run OpenCV", func() {
+		f.MVVM.StartGoCV(opencvDemoWindow.ImagePath)
 	})
+
+	opencvDemoWindow.ProgBar = widget.NewProgressBar()
 
 	return container.NewVBox(
 		header,
 		openFile,
-		showFile,
 		opencvDemoWindow.InputImageContainer,
+		startOpenCV,
+		opencvDemoWindow.ProgBar,
 	)
 }
 

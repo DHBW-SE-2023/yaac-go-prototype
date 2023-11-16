@@ -4,19 +4,22 @@ import (
 	"fmt"
 
 	yaac_backend "github.com/DHBW-SE-2023/yaac-go-prototype/internal/backend"
+	yaac_frontend "github.com/DHBW-SE-2023/yaac-go-prototype/internal/frontend"
 )
 
-func (m *MVVM) StartGoCV() {
+func (m *MVVM) StartGoCV(img_path string) {
 	backend := yaac_backend.New(m)
+	frontend := yaac_frontend.New(m)
+
 	var msg string
 	var suc bool
 	ch := make(chan int)
 	go func() {
-		msg, suc = backend.StartGoCV("./assets/list.jpg", ch)
+		msg, suc = backend.StartGoCV(img_path, ch)
 	}()
 
 	for elem := range ch {
-		fmt.Printf("Progress: %d\n", elem)
+		frontend.UpdateProgress(float64(elem) / 100)
 	}
 	fmt.Printf("Done!\n\tSuccess: %s\n\tMessage: %s\n", fmt.Sprint(suc), msg)
 }
