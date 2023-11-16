@@ -20,6 +20,10 @@ func (f *Frontend) OpenMailWindow() {
 	mailWindow.SetIcon(r)
 
 	mailWindow.SetContent(makeMailWindow(f))
+
+	mailWindow.Resize(fyne.NewSize(400, 200))
+	mailWindow.CenterOnScreen()
+
 	mailWindow.Show()
 }
 
