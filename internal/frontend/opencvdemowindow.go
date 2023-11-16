@@ -15,9 +15,11 @@ import (
 )
 
 type OpencvDemoWindow struct {
-	Window    fyne.Window
-	ImagePath string
-	ProgBar   *widget.ProgressBar
+	Window               fyne.Window
+	ImagePath            string
+	ProgBar              *widget.ProgressBar
+	InputImageContainer  *fyne.Container
+	OutputImageContainer *fyne.Container
 }
 
 var opencvDemoWindow OpencvDemoWindow
@@ -49,7 +51,8 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 
 	inputImage := canvas.NewLinearGradient(color.Transparent, color.Black, 0)
 	inputImageScroll := container.NewScroll(inputImage)
-	inputImageContainer := container.NewAdaptiveGrid(1, inputImageScroll)
+	opencvDemoWindow.InputImageContainer = container.NewAdaptiveGrid(1, inputImageScroll)
+	opencvDemoWindow.OutputImageContainer = container.NewAdaptiveGrid(1, inputImageScroll)
 
 	openFile := widget.NewButton("File Open With Filter (.jpg or .png)", func() {
 		fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
@@ -62,7 +65,7 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 				return
 			}
 			opencvDemoWindow.ImagePath = reader.URI().Path()
-			showImage(reader, inputImageContainer)
+			showImage(reader, opencvDemoWindow.InputImageContainer)
 		}, opencvDemoWindow.Window)
 		fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".jpeg"}))
 		fd.Show()
@@ -71,7 +74,6 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 	startOpenCV := widget.NewButton("Run OpenCV", func() {
 		f.MVVM.StartGoCV(opencvDemoWindow.ImagePath)
 	})
-
 	opencvDemoWindow.ProgBar = widget.NewProgressBar()
 
 	/*
@@ -89,13 +91,39 @@ func makeOpencvDemoWindow(f *Frontend) *fyne.Container {
 			header,
 			openFile,
 		),
-		inputImageContainer,
+		opencvDemoWindow.InputImageContainer,
 		container.NewVBox(
 			startOpenCV,
 			opencvDemoWindow.ProgBar,
 		),
-		widget.NewLabel("TEST"),
+		opencvDemoWindow.OutputImageContainer,
 	)))
+}
+
+func (f *Frontend) ShowGeneratedImage(out_Path string) {
+	// Load the image resource directly from the file path
+	res, err := fyne.LoadResourceFromPath(out_Path)
+	if err != nil {
+		log.Println("Error loading generated image:", err)
+		return
+	}
+
+	// Create an image from the resource
+	img := canvas.NewImageFromResource(res)
+	if img == nil {
+		log.Println("Error creating image from resource")
+		return
+	}
+
+	img.FillMode = canvas.ImageFillContain
+
+	imgScroll := container.NewScroll(img)
+	opencvDemoWindow.OutputImageContainer.Objects = []fyne.CanvasObject{imgScroll}
+
+	// Refresh the content to display the new image
+	opencvDemoWindow.Window.Content().Refresh()
+	opencvDemoWindow.Window.RequestFocus()
+	opencvDemoWindow.Window.Show()
 }
 
 func loadImage(f fyne.URIReadCloser) *canvas.Image {

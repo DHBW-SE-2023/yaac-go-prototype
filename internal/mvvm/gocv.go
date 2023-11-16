@@ -17,9 +17,14 @@ func (m *MVVM) StartGoCV(img_path string) {
 	go func() {
 		msg, suc = backend.StartGoCV(img_path, ch)
 	}()
-
 	for elem := range ch {
 		frontend.UpdateProgress(float64(elem) / 100)
 	}
-	fmt.Printf("Done!\n\tSuccess: %s\n\tMessage: %s\n", fmt.Sprint(suc), msg)
+	if suc {
+		frontend.ShowGeneratedImage(msg)
+	} else {
+		fmt.Println(msg)
+	}
+
+	//fmt.Printf("Done!\n\tSuccess: %s\n\tMessage: %s\n", fmt.Sprint(suc), msg)
 }
