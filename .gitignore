@@ -19,3 +19,12 @@
 
 # Go workspace file
 go.work
+
+# Build folder
+!build/README.md
+build/*
+
+# Ignore Personal Data
+assets/list*.jpg
+assets/state*.jpg
+.vscode/
