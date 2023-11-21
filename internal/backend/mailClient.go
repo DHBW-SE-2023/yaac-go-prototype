@@ -1,3 +1,4 @@
+// yaac_backend is the package containing all backend functionality for the yaac protoype
 package yaac_backend
 
 import (
@@ -7,6 +8,7 @@ import (
 	"log"
 )
 
+// GetResponse is the public exposed function to return the email data with given credentials
 func (b *Backend) GetResponse(input yaac_shared.EmailData) string {
 	msg, err := getLatestMessage(input.MailServer, input.Email, input.Password)
 	if err != nil {
@@ -15,6 +17,8 @@ func (b *Backend) GetResponse(input yaac_shared.EmailData) string {
 	return msg
 }
 
+// getLatestMessage is the privat helper function connecting to a imap mailserver and returning the name of the
+// first(newest) unseen mail in the inbox
 func getLatestMessage(serverAddr string, username string, password string) (string, error) {
 	// Connect to server
 	c, err := client.DialTLS(serverAddr, nil)
