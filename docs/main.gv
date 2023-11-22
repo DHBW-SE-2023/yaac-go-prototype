@@ -1,0 +1,45 @@
+digraph gocallvis {
+    label="github.com/DHBW-SE-2023/yaac-go-prototype/cmd/yaac";
+    labeljust="l";
+    fontname="Arial";
+    fontsize="14";
+    rankdir="LR";
+    bgcolor="lightgray";
+    style="solid";
+    penwidth="0.5";
+    pad="0.0";
+    nodesep="0.35";
+
+    node [shape="box" style="filled,rounded" fillcolor="honeydew" fontname="Verdana" penwidth="1.0" margin="0.05,0.0"];
+    edge [minlen="2"]
+
+    subgraph "cluster_focus" {
+        fontsize="18";
+bgcolor="#e6ecfa";
+label="main";
+labelloc="t";
+labeljust="c";
+        
+        "github.com/DHBW-SE-2023/yaac-go-prototype/cmd/yaac.main" [ penwidth="0.5" tooltip="github.com/DHBW-SE-2023/yaac-go-prototype/cmd/yaac.main | defined in main.go:7\nat main.go:8: calling [github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.New]\nat main.go:9: calling [(*github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.MVVM).OpenMainWindow]" fillcolor="lightblue" label="main" ]
+        
+        subgraph "cluster_github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm" {
+        penwidth="0.8";
+fontsize="16";
+tooltip="package: github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm";
+URL="/?f=github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm";
+style="filled";
+fillcolor="lightyellow";
+fontname="Tahoma bold";
+rank="sink";
+label="yaac_mvvm";
+        
+        "github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.New" [ fillcolor="moccasin" label="New" penwidth="1.5" tooltip="github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.New | defined in mvvm.go:5" ]
+        "(*github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.MVVM).OpenMainWindow" [ fillcolor="moccasin" label="(*MVVM).OpenMainWindow" penwidth="1.5" tooltip="(*github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.MVVM).OpenMainWindow | defined in mainwindow.go:5" ]
+        
+    }
+
+    }
+
+    "github.com/DHBW-SE-2023/yaac-go-prototype/cmd/yaac.main" -> "github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.New" [ color="saddlebrown" tooltip="at main.go:8: calling [github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.New]" ]
+    "github.com/DHBW-SE-2023/yaac-go-prototype/cmd/yaac.main" -> "(*github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.MVVM).OpenMainWindow" [ tooltip="at main.go:9: calling [(*github.com/DHBW-SE-2023/yaac-go-prototype/internal/mvvm.MVVM).OpenMainWindow]" color="saddlebrown" ]
+}
